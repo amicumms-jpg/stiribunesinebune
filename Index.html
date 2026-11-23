@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ro" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Verifică Știrea — Detector Fake News AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(59, 130, 246, 0.4); }
+      50% { border-color: rgba(59, 130, 246, 0.9); }
+    }
+    .loading-border {
+      animation: pulse-border 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-blue-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 glass-card border-b border-slate-800/80 px-4 py-3.5">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-bold text-base tracking-tight text-white leading-none">VerificăȘtirea<span class="text-blue-400">.ai</span></h1>
+          <p class="text-[11px] text-slate-400 mt-0.5">Fact-Checking Live cu Google Search</p>
+        </div>
+      </div>
+      <span class="text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        ● Live
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 w-full max-w-xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Intro -->
+    <div class="text-center space-y-1.5">
+      <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+        Află imediat dacă o știre e reală sau falsă
+      </h2>
+      <p class="text-xs sm:text-sm text-slate-400">
+        Lipește textul știrii, o postare de pe Facebook/TikTok sau un link și AI-ul verifică sursele oficiale în timp real.
+      </p>
+    </div>
+
+    <!-- Input Card -->
+    <div id="inputBox" class="glass-card rounded-2xl p-4 shadow-xl space-y-3 transition-all">
+      <div class="flex items-center justify-between">
+        <label for="newsInput" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Text știre sau link
+        </label>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="pasteFromClipboard()" class="text-xs font-medium text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-lg transition flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Lipește
+          </button>
+          <button type="button" onclick="clearInput()" class="text-xs font-medium text-slate-400 hover:text-slate-200 px-2 py-1 rounded-lg transition">
+            Șterge
+          </button>
+        </div>
+      </div>
+
+      <textarea
+        id="newsInput"
+        rows="5"
+        placeholder="Ex: Guvernul a decis astăzi că de mâine se închid toate benzinăriile din țară... sau lipește un link https://..."
+        class="w-full bg-slate-950/70 text-sm text-slate-100 placeholder-slate-500 rounded-xl p-3.5 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none transition"
+      ></textarea>
+
+      <!-- Exemple rapide -->
+      <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+        <span class="text-[11px] text-slate-500">Testează rapid:</span>
+        <button type="button" onclick="fillExample(1)" class="text-[11px] bg-slate-800/80 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded-md border border-slate-700/60 transition">
+          Știre alarmistă
+        </button>
+        <button type="button" onclick="fillExample(2)" class="text-[11px] bg-slate-800/80 hover:bg-slate-800 text-slate-300 px-2 py-1 rounded-md border border-slate-700/60 transition">
+          Clickbait financiar
+        </button>
+      </div>
+
+      <button
+        id="verifyBtn"
+        onclick="verifyNews()"
+        class="w-full py-3.5 px-5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.99] transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+        <span>Verifică acum</span>
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden glass-card rounded-2xl p-6 text-center space-y-3">
+      <div class="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+      <div class="space-y-1">
+        <p class="text-sm font-semibold text-white">Căutăm în sursele oficiale și analizăm textul...</p>
+        <p class="text-xs text-slate-400">Verificăm informația în timp real pe Google (durează 3-6 secunde)</p>
+      </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="errorBox" class="hidden rounded-2xl p-4 bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm flex items-start gap-2.5">
+      <svg class="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <span id="errorText">A apărut o eroare.</span>
+    </div>
+
+    <!-- Result Card -->
+    <div id="resultCard" class="hidden glass-card rounded-2xl p-5 shadow-2xl space-y-5 border border-slate-700/80">
+      
+      <!-- Verdict Header & Score -->
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-1">Rezultat analiză</span>
+          <span id="verdictBadge" class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-extrabold tracking-wide">
+            VERDICT
+          </span>
+        </div>
+        <div class="text-right">
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">Credibilitate</span>
+          <span id="scoreText" class="text-2xl font-black text-white">0%</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+        <div id="scoreBar" class="h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-1.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Explicație pe scurt</h3>
+        <p id="summaryText" class="text-sm text-slate-200 leading-relaxed"></p>
+      </div>
+
+      <!-- Red Flags -->
+      <div class="space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Semnale detectate în text</h3>
+        <ul id="flagsList" class="space-y-1.5 text-xs sm:text-sm text-slate-300"></ul>
+      </div>
+
+      <!-- Sources -->
+      <div id="sourcesSection" class="space-y-2 pt-2 border-t border-slate-800/80">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Surse verificate pe web</h3>
+        <div id="sourcesList" class="space-y-2"></div>
+      </div>
+
+      <!-- Share Button -->
+      <button onclick="copyResultToShare()" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-300 bg-slate-800/90 hover:bg-slate-800 border border-slate-700 transition flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        <span id="shareBtnText">Copiază rezultatul pentru WhatsApp / Facebook</span>
+      </button>
+    </div>
+
+    <!-- Local History -->
+    <div id="historySection" class="hidden space-y-2.5 pt-2">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Verificări recente</h3>
+        <button onclick="clearHistory()" class="text-[11px] text-slate-500 hover:text-slate-300">Golește istoricul</button>
+      </div>
+      <div id="historyList" class="space-y-2"></div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/60 py-4 px-4 text-center text-[11px] text-slate-500">
+    VerificăȘtirea.ai — Verificare automată bazată pe AI și căutare web în timp real. Verifică întotdeauna și sursele oficiale.
+  </footer>
+
+  <script>
+    let lastResultData = null;
+
+    async function pasteFromClipboard() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          document.getElementById('newsInput').value = text;
+        }
+      } catch (err) {
+        alert('Apasă lung în căsuța de text și alege „Lipește” (Paste).');
+      }
+    }
+
+    function clearInput() {
+      document.getElementById('newsInput').value = '';
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('errorBox').classList.add('hidden');
+    }
+
+    function fillExample(type) {
+      const input = document.getElementById('newsInput');
+      if (type === 1) {
+        input.value = 'URGENT! Distribuie masiv înainte să șteargă postarea! De luni se taie pensiile cu 40% în toată România și se blochează bancomatele în weekend!';
+      } else {
+        input.value = 'Banca Națională a lansat o platformă secretă prin care orice român poate câștiga 4.500 lei pe zi investind doar 250 lei. Înscrie-te acum!';
+      }
+    }
+
+    async function verifyNews() {
+      const content = document.getElementById('newsInput').value.trim();
+      const errorBox = document.getElementById('errorBox');
+      const resultCard = document.getElementById('resultCard');
+      const loadingState = document.getElementById('loadingState');
+      const verifyBtn = document.getElementById('verifyBtn');
+      const inputBox = document.getElementById('inputBox');
+
+      errorBox.classList.add('hidden');
+      resultCard.classList.add('hidden');
+
+      if (content.length < 15) {
+        showError('Te rog introdu cel puțin o propoziție sau un link complet pentru verificare.');
+        return;
+      }
+
+      // UI Loading
+      loadingState.classList.remove('hidden');
+      inputBox.classList.add('loading-border');
+      verifyBtn.disabled = true;
+      verifyBtn.classList.add('opacity-60', 'cursor-not-allowed');
+
+      try {
+        const response = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Eroare la verificarea știrii.');
+        }
+
+        lastResultData = { ...data, snippet: content.slice(0, 75) + (content.length > 75 ? '...' : '') };
+        renderResult(data);
+        saveToHistory(lastResultData);
+
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        loadingState.classList.add('hidden');
+        inputBox.classList.remove('loading-border');
+        verifyBtn.disabled = false;
+        verifyBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      }
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById('errorBox');
+      document.getElementById('errorText').textContent = msg;
+      errorBox.classList.remove('hidden');
+    }
+
+    function renderResult(data) {
+      const resultCard = document.getElementById('resultCard');
+      const badge = document.getElementById('verdictBadge');
+      const scoreText = document.getElementById('scoreText');
+      const scoreBar = document.getElementById('scoreBar');
+      const summaryText = document.getElementById('summaryText');
+      const flagsList = document.getElementById('flagsList');
+      const sourcesList = document.getElementById('sourcesList');
+      const sourcesSection = document.getElementById('sourcesSection');
+
+      const score = Math.max(0, Math.min(100, Number(data.scor_credibilitate) || 0));
+      const verdict = (data.verdict || 'NEVERIFICABIL').toUpperCase();
+
+      badge.textContent = verdict;
+      scoreText.textContent = `${score}%`;
+      scoreBar.style.width = `${score}%`;
+
+      // Culori în funcție de verdict/scor
+      badge.className = 'inline-flex items-center px-3 py-1 rounded-lg text-sm font-extrabold tracking-wide ';
+      scoreBar.className = 'h-full rounded-full transition-all duration-700 ';
+
+      if (verdict.includes('FALS') || score < 30) {
+        badge.classList.add('bg-red-500/20', 'text-red-400', 'border', 'border-red-500/30');
+        scoreBar.classList.add('bg-red-500');
+        scoreText.className = 'text-2xl font-black text-red-400';
+      } else if (verdict.includes('MANIPULARE') || verdict.includes('PARȚIAL') || (score >= 30 && score < 70)) {
+        badge.classList.add('bg-amber-500/20', 'text-amber-400', 'border', 'border-amber-500/30');
+        scoreBar.classList.add('bg-amber-500');
+        scoreText.className = 'text-2xl font-black text-amber-400';
+      } else if (verdict.includes('ADEVĂRAT') && score >= 70) {
+        badge.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border', 'border-emerald-500/30');
+        scoreBar.classList.add('bg-emerald-500');
+        scoreText.className = 'text-2xl font-black text-emerald-400';
+      } else {
+        badge.classList.add('bg-slate-700/60', 'text-slate-300', 'border', 'border-slate-600');
+        scoreBar.classList.add('bg-slate-400');
+        scoreText.className = 'text-2xl font-black text-slate-300';
+      }
+
+      summaryText.textContent = data.rezumat || 'Nu există detalii suplimentare.';
+
+      // Semnale de alarmă
+      flagsList.innerHTML = '';
+      const flags = Array.isArray(data.semnale_alarma) && data.semnale_alarma.length > 0
+        ? data.semnale_alarma
+        : ['Niciun semnal major detectat'];
+
+      flags.forEach(flag => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2 bg-slate-900/70 px-3 py-2 rounded-lg border border-slate-800/70';
+        li.innerHTML = `<span class="text-blue-400 font-bold">•</span><span>${escapeHtml(flag)}</span>`;
+        flagsList.appendChild(li);
+      });
+
+      // Surse web
+      sourcesList.innerHTML = '';
+      if (Array.isArray(data.surse_gasite) && data.surse_gasite.length > 0) {
+        sourcesSection.classList.remove('hidden');
+        data.surse_gasite.forEach(src => {
+          if (!src.url) return;
+          const a = document.createElement('a');
+          a.href = src.url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.className = 'block p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition flex items-center justify-between gap-2';
+          a.innerHTML = `
+            <span class="text-xs font-medium text-blue-400 truncate">${escapeHtml(src.titlu || src.url)}</span>
+            <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          `;
+          sourcesList.appendChild(a);
+        });
+      } else {
+        sourcesSection.classList.add('hidden');
+      }
+
+      resultCard.classList.remove('hidden');
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function copyResultToShare() {
+      if (!lastResultData) return;
+      const shareText = `🔍 Verificare știre:\nVerdict: ${lastResultData.verdict} (Credibilitate: ${lastResultData.scor_credibilitate}%)\n\n${lastResultData.rezumat}\n\nVerificat pe ${window.location.origin}`;
+      navigator.clipboard.writeText(shareText);
+      const btnText = document.getElementById('shareBtnText');
+      btnText.textContent = '✓ Copiat! Poți da Paste acum';
+      setTimeout(() => {
+        btnText.textContent = 'Copiază rezultatul pentru WhatsApp / Facebook';
+      }, 2500);
+    }
+
+    function saveToHistory(item) {
+      let history = JSON.parse(localStorage.getItem('factcheck_history') || '[]');
+      history.unshift(item);
+      history = history.slice(0, 5);
+      localStorage.setItem('factcheck_history', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('factcheck_history') || '[]');
+      const section = document.getElementById('historySection');
+      const list = document.getElementById('historyList');
+
+      if (history.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      section.classList.remove('hidden');
+      list.innerHTML = '';
+
+      history.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-3 rounded-xl flex items-center justify-between gap-3 cursor-pointer hover:border-slate-700 transition';
+        div.onclick = () => {
+          lastResultData = item;
+          renderResult(item);
+        };
+        div.innerHTML = `
+          <p class="text-xs text-slate-300 truncate flex-1">${escapeHtml(item.snippet)}</p>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200 shrink-0">${escapeHtml(item.verdict)} (${item.scor_credibilitate}%)</span>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function clearHistory() {
+      localStorage.removeItem('factcheck_history');
+      renderHistory();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Încarcă istoricul la deschiderea paginii
+    renderHistory();
+  </script>
+</body>
+</html>
